@@ -101,6 +101,7 @@ def get_dealerships(request, state="All"):
     else:
         endpoint = "/fetchDealers/"+state
     dealerships = get_request(endpoint)
+    print(state)
     return JsonResponse({"status": 200, "dealers": dealerships})
 
 # Create a `get_dealer_reviews` view to render the reviews of a dealer
@@ -137,14 +138,13 @@ def get_dealer_details(request, dealer_id):
 
 
 def add_review(request):
-    if not (request.user.is_anonymous is False):
+    if request.user.is_authenticated:  # Check if the user is authenticated
         data = json.loads(request.body)
         try:
-            JsonResponse = post_review(data)
-            return JsonResponse({"status": 200})
-        except Exception:
+            response_data = post_review(data)
+            return JsonResponse({"status": 200, "response": response_data})
+        except SomeSpecificException:  # Replace with a specific exception type if possible
             return JsonResponse({"status": 401,
-                                 "message": "Error in posting review"}
-                                )
+                                 "message": "Error in posting review"})
     else:
         return JsonResponse({"status": 403, "message": "Unauthorized"})
